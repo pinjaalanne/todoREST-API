@@ -1,18 +1,38 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteTodo = exports.updateTodo = exports.getTodos = exports.createTodo = void 0;
-const todo_1 = require("../models/todo");
-const TODOS = [];
-const createTodo = (req, res, next) => {
-    // const text = req.body.text;
-    const text = req.body.text;
-    const newTodo = new todo_1.Todo(Math.random().toString(), text);
-    TODOS.push(newTodo);
-    res.status(201).json({ message: 'Created the todo.', createdTodo: newTodo });
+const todo_1 = __importDefault(require("../models/todo"));
+// const TODOS: Todo[] = [];
+const createTodo = async (req, res, next) => {
+    try {
+        const data = req.body;
+        console.log(data);
+        let todos = await todo_1.default.create(data);
+        return res.status(200)
+            .json({ message: 'Todo created successfully', todos });
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+    // // const text = req.body.text;
+    // const text = (req.body as { text: string }).text;
+    // const newTodo = new Todo(Math.random().toString(), text);
+    // Todo.create(newTodo);
+    // res.status(201).json({ message: 'Created the todo.', createdTodo: newTodo });
 };
 exports.createTodo = createTodo;
-const getTodos = (req, res, next) => {
-    res.json({ todos: TODOS });
+const getTodos = async (req, res, next) => {
+    try {
+        let todos = await todo_1.default.find();
+        return res.status(200).json({ todos });
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+    // res.json({ todos: TODOS });
 };
 exports.getTodos = getTodos;
 const updateTodo = (req, res, next) => {
@@ -22,7 +42,7 @@ const updateTodo = (req, res, next) => {
     if (todoIndex < 0) {
         throw new Error('Could not find todo!');
     }
-    TODOS[todoIndex] = new todo_1.Todo(TODOS[todoIndex].id, updatedText);
+    TODOS[todoIndex] = new todo_1.default(TODOS[todoIndex].id, updatedText);
     res.json({ message: 'Updated!', updatedTodo: TODOS[todoIndex] });
 };
 exports.updateTodo = updateTodo;
